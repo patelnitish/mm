@@ -1,0 +1,448 @@
+----------------------------Experiment 1a-----------------
+
+mov r0,#30h
+mov r1,#40h
+mov r7,#05h
+back:mov a,@r0
+mov @r1,a
+inc r0
+inc r1
+djnz r7,back
+end
+
+----------------------Experiment 1b--------------------
+
+mov r0,#30h
+mov r1,#40h
+mov r7,#05h
+
+back:mov a,@r0
+     mov r2,a
+     mov @r0,a
+
+
+      mov a,@r1
+      mov a,r2
+      mov @r1,a
+      inc r0
+      inc r1
+  djnz r7,back
+end
+
+---------------------Experimet 2a---------------------
+
+// 1st number is 2040h
+// 2nd number is 2b20h
+ mov dptr,#2040h
+ mov a,#2bh
+ mov b,#20h
+ add a,dph
+ mov dph,a
+ mov a,b
+ addc a,dpl
+ mov dpl,a
+ end
+
+----------------------Experiment 2c---------------------
+
+mov a, #15h
+rrc a
+jc odd
+mov 31h,00h
+sjmp exit
+odd:mov 31h,#0ffh
+exit:sjmp exit
+
+-------------------Experiment 3a---------------------
+org 0000h
+	sjmp 30h
+	 org 30h
+		 mov r1,#50h
+		 mov a,@r1
+		 mov r2,a
+		 
+		 anl a,#0fh
+		 orl a,#30h
+		 inc r1
+		 mov @r1,a
+		 
+		 mov a,r2
+		 swap a
+		 anl a,#0fh
+		 orl a,#30h
+		 inc r1
+		 mov @r1,a
+		 
+------------------Experiment 3b-------------------------
+org 00h
+	sjmp 30h
+	org 30h
+		mov r0,#30h
+		mov r1,#40h
+		mov r2,#3h
+		back:	mov a,@r0
+		anl a,#0fh
+		swap a
+		mov r3,a
+		inc r0
+		mov @r0,a
+		anl a,#0fh
+		orl a,r3
+		mov @r1,a
+		inc r0
+		inc r1
+		djnz r2,back
+
+-----------------------3a-----------------------
+
+mov a , #20h
+rrc a
+jc odd
+mov 31h,00h
+sjmp exit
+odd:mov 31h,#0ffh
+exit:sjmp exit
+end
+--------------------------4.a specified port toggling----------
+org 000h
+ mov a, #offh
+ back: mov p1, a
+       acall delay
+       cpl a
+       acall delay
+       sjmp back
+ delay: mov r0, #8h
+	here3: mov r1, #0ffh
+	here2: mov r2, #0ffh
+	here: djnz r2, here
+	      djnz r1, here2
+		  djnz r0, here3
+		  ret 
+		  end
+      
+
+c-program
+
+#include<reg 51.h>
+void msdelay(unsigned int);
+void main(void)
+{
+while(1)
+{
+P1=0x55;
+msdelay(500);
+P1=0xAA;
+msdelay(500);
+}
+}
+
+void msdelay(unsigned int itime)
+{
+unsigned int i,j;
+for(i=0; i<ms; i++)
+for(j=0; j<1275; j++);
+}
+
+
+
+------------------4b. specified port pin toggling----------------------------------------------------
+
+        org 000h
+	again: setb p2.0
+	acall delay
+	clr p2.0
+	acall delay
+	sjmp again
+	delay: mov r0, #8h
+	here3: mov r1, #0ffh
+	here2: mov r2, #0ffh
+	here: djnz r2, here
+	      djnz r1, here2
+		  djnz r0, here3
+		  ret 
+		  end
+
+c-program
+#include<reg 51.h>
+sbit mybit=P1.5;
+void msdelay(unsigned int);
+void main(void)
+{
+unsigned int c;
+for(c=0; c<50000; c++)
+{
+mybit = 1;
+msdelay(500);
+mybit = 0;
+msdelay(500);
+}
+}
+
+void msdelay(unsigned int itime)
+{
+unsigned int i,j;
+for(i=0; i<ms; i++)
+for(j=0; j<1275; j++);
+}
+	
+
+
+--------------------experiment 5 - BCD 7 segment------------------------------------
+
+#include<reg51.h>
+void delay(unsigned int ms);
+#define seg_out P1
+void main(void)
+{
+while(1)
+{
+P1=0x00;
+
+seg_out=0x3F;
+delay(500);
+
+seg_out=0x06;
+delay(500);
+
+seg_out=0x5B;
+delay(500);
+
+seg_out=0x4F;
+delay(500);
+
+seg_out=0x66;
+delay(500);
+
+seg_out=0x6D;
+delay(500);
+
+seg_out=0x7D;
+delay(500);
+[2:39 pm, 31/10/2022] +977 986-0371932: seg_out=0x07;
+delay(500);
+
+seg_out=0x7F;
+delay(500);
+
+seg_out=0x67;
+delay(500);
+
+
+}
+}
+void delay(unsigned int ms)
+{
+unsigned int t1, t2;
+for(t1=0;t1<ms;t1++)
+{
+for(t2=0;t2<334;t2++);
+}
+}
+-------------6a- interfacing buzzer or led------------------
+#include<reg51.h>
+void delay(unsigned int ms);
+sbit SWT = P2^0;
+sbit LED = P3^5;
+void main(void)
+{
+	P2 = 0xFF;
+	P3 = 0x00;
+	
+	while(1)
+	{
+		if(SWT == 1)
+		{
+			LED = 0;
+		}
+		else
+		{
+			LED = 1;
+		}
+		delay(200);
+	}
+}
+
+void delay(unsigned int ms)
+{
+	unsigned int i,j;
+	for(i=0; i<ms; i++){
+	for(j=0; j<334; j++);
+}
+}
+
+----------------6b- Interfacing relay------------------------------------
+#include<reg51.h>
+void delay(unsigned int ms);
+sbit swt = P2^0;
+sbit relay = P3^4;
+void main(void)
+{
+	swt = 1;
+	relay = 0;
+	
+	while(1)
+	{
+		if(swt==0)
+		{
+			relay = ~relay;
+		while(swt==0);
+		delay(200);
+	
+}
+}
+}
+void delay(unsigned int ms)
+{
+	unsigned int i,j;
+	for(i=0; i<ms; i++){
+	for(j=0; j<334; j++);
+}
+}
+----------------7b- Counter 0 in mode 2----------------------------------------------
+serial port...      
+  org 0000h
+	mov tmod,#01100000b
+	mov th1,#0
+	setb p3.5
+	again : setb tr1
+	back: mov a,tl1
+	mov p2,a
+	jnb tf1,back
+	clr tr1
+	clr tf1
+	sjmp again
+	end
+----------------7c-Square wave--------------------------------------------
+#include<reg51.h>
+void TOM1Delay(void);
+sbit mybit=P1^5;
+void main(void)
+{
+	while(1)
+	{
+		mybit=~mybit;
+		TOM1Delay();
+	}
+}
+	
+	void TOM1Delay(void)
+	{
+		TMOD = 0x01;
+		TL0 = 0xFD;
+		TH0 = 0x4B;
+		TR0 = 1;
+		while(TF0==0);
+		TR0 = 0;
+		TF0 = 0;
+	}
+
+-------------------8-----IOT---------------------------------
+#include<reg51.h>
+sbit rs=P0^6;
+sbit rw=P2^0;
+sbit en=P0^7;
+void lcdcmd(unsigned char);
+void lcddat(unsigned char);
+void delay();
+void math();
+{
+P1=0x00;
+	while(1)
+		{
+	lcdcmd(0x38);
+		delay();
+		lcdcmd(0x01);
+		delay();
+		lcdcmd(0x06);
+		delay();
+		lcdcmd(0x10);
+		delay();
+		lcdcmd(0x0C);
+		delay();
+		lcdcmd(0x81);
+		delay();
+		lcddat('I');
+		lcddat('O');
+		lcddat('T');	
+	}
+}
+
+void lcdcmd(unsigned char val)
+{
+P1=val;
+rs=0;
+rw=0;
+en=1;
+delay();
+en=0;
+}
+void lcddat(unsigned char val){
+P1=val;
+rw=0;
+en=1;
+delay();
+en=0;
+}
+
+void delay()
+{
+unsigned int i;
+for(i=0;i<12000;i++);
+}
+
+---------------------9-Internet of things---------------------------------------
+#include<reg51.h>
+void main(void)
+{
+unsigned char Z;
+	unsigned char branch[]="INTERNET OF THINGS";
+TMOD=0X20;
+	TH1=0XFD;
+	SCON=0X50;
+	TR1=1;
+	while(1)
+	{
+	for(Z=0; Z<=20; Z++)
+		{
+			SBUF=branch[Z];
+			while(TI==0);
+			TI=0;
+		}
+	}
+}
+-----------------10a > To generate a analog signals as sine wave in analyzer--------
+ORG 0000H
+MOV P2,#00H
+LOOP:MOV DPTR,#TABLE
+MOV R2,#13
+BACK1:CLR A
+MOVC A,@A+DPTR
+MOV P2,A
+INC DPTR
+DJNZ R2,BACK1
+SJMP LOOP
+ORG 300H
+TABLE:DB
+128,192,238,255,238,192,128,64,17,0,17,64;
+END
+
+----------------10b:To program for Triangular wave generation----------
+ORG 0000H
+START:MOV A,#00H
+UP:MOV P1,A
+INC A
+CJNE A,#0FFH,UP
+DOWN:MOV P1,A
+DEC A
+JNZ DOWN
+SJMP START
+END
+
+
+------------------------10c:To generate an analog signals as ramp wave-------------
+ORG 0000H
+MOV A,#00H
+LOOP:MOV P1,A
+INC A
+SJMP LOOP
+END
